@@ -35,7 +35,7 @@ const instruments = readInstrumentsToDataFrame(instrumentsFilePath);
 
 const symbol = 'SBIN';
 const optionType = 'CE'; // Example option type
-const currentPrice = 750; // Example current price
+const currentPrice = 726; // Example current price
 
 const atmOptions = filterOptions(instruments, symbol, optionType, currentPrice);
 console.log(atmOptions);
