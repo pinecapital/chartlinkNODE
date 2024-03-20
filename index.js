@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(session({
-    secret: config.session.secret, // Secret key to sign the session ID cookie
+    secret: config.session_secret, // Secret key to sign the session ID cookie
     resave: false, // Don't save session if unmodified
     saveUninitialized: true, // Don't create session until something stored
     cookie: { secure: true } // True for HTTPS
