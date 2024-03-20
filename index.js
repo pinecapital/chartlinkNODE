@@ -193,29 +193,7 @@ app.get('/fetch-logs', (req, res) => {
         res.send(formattedData);
     });
 });
-// app.post('/update-tpsl', (req, res) => {
-//     if (!req.session.isLoggedIn) {
-//         return res.status(403).send('Unauthorized');
-//     }
 
-//     const { symbol, qty, tp, sl } = req.body;
-//     fs.readFile('tpsl.json', 'utf8', (err, data) => {
-//         if (err) {
-//             return res.status(500).send('Internal Server Error');
-//         }
-
-//         const tpsl = JSON.parse(data);
-//         tpsl[symbol] = { qty: parseInt(qty, 10), tp: parseFloat(tp), sl: parseFloat(sl) };
-
-//         fs.writeFile('tpsl.json', JSON.stringify(tpsl, null, 2), 'utf8', (err) => {
-//             if (err) {
-//                 return res.status(500).send('Internal Server Error');
-//             }
-
-//             res.send('TPSL updated successfully');
-//         });
-//     });
-// });
 
 app.post('/update-tpsl', (req, res) => {
     if (!req.session.isLoggedIn) {
@@ -307,7 +285,7 @@ app.post('/chartlink', (req, res) => {
         
         // Filter for the ATM option based on the optionType and triggerPrice
         const atmOption = filterOptions(instruments, stock, optionType, triggerPrice);
-        const tpsl = JSON.parse(fs.readFileSync('tpsl.json'));
+        const tpsl = JSON.parse(fs.readFileSync('tpsl.json','utf8'));
         const tpConfig = tpsl[stock] || tpsl["DEFAULT"];
     
         if (!tpConfig) {
