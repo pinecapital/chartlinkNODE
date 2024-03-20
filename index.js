@@ -39,7 +39,7 @@ const kite = new KiteConnect({
 let currentAccessToken = null;
 
 
-app.get('/', (req, res) => {
+app.get('/kite', (req, res) => {
     // Generate the Kite login URL
     const kiteLoginURL = kite.getLoginURL();
 
@@ -246,4 +246,5 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol) {
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
+    console.log(`open this link in browser http://localhost:${port}/kite`)
 });
