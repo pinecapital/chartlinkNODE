@@ -79,7 +79,7 @@ app.get('/login/callback', (req, res) => {
                 // });
                 // console.log("instrument saved at instruments.json")
 
-                res.redirect('/');
+                res.redirect('/kite');
             })
             .catch(err => {
                 console.error('Error obtaining access token:', err);

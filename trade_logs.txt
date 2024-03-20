@@ -14,3 +14,9 @@
 3/20/2024, 12:15:18 PM: placing order for ICICIPRULI24MAR565PE with qty 1500 at price 13.3 with TP % 1 and SL% 1 and lot size 1500 and tick size 0.05 and instrument token 32463618
 3/20/2024, 12:27:25 PM: Order processed for ICICIPRULI24MAR565PE based on alert for ICICIPRULI
 3/20/2024, 12:27:25 PM: placing order for ICICIPRULI24MAR565PE with qty 1500 at price 13.3 with TP % 1 and SL% 1 and lot size 1500 and tick size 0.05 and instrument token 32463618
+3/20/2024, 1:33:12 PM: Order processed for ICICIPRULI24MAR565PE based on alert for ICICIPRULI
+3/20/2024, 1:33:13 PM: placing order for ICICIPRULI24MAR565PE with qty 1500 at price 12 with TP % 1 and SL% 1 and lot size 1500 and tick size 0.05 and instrument token 32463618
+3/20/2024, 1:48:00 PM: Exiting position for tradingsymbol ICICIPRULI24MAR565PE token number 32463618 at price 11.7
+3/20/2024, 1:51:05 PM: Order processed for ICICIPRULI24MAR565PE based on alert for ICICIPRULI
+3/20/2024, 1:51:05 PM: placing order for ICICIPRULI24MAR565PE with qty 1500 at price 11.7 with TP % 1 and SL% 1 and lot size 1500 and tick size 0.05 and instrument token 32463618
+3/20/2024, 1:51:31 PM: Exiting position for tradingsymbol ICICIPRULI24MAR565PE token number 32463618 at price 10.55
