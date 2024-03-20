@@ -5,7 +5,7 @@ require('dotenv').config();
 const { readInstrumentsToDataFrame, filterOptions } = require('./getToken');
 
 const express = require('express');
-const express = require('express-session')
+const session = require('express-session')
 
 const bodyParser = require('body-parser');
 const WebSocket = require('ws');
