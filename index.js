@@ -60,6 +60,62 @@ app.get('/kite', (req, res) => {
     `);
 });
 
+app.get('/logs', (req, res) => {
+    // Endpoint HTML template with a Refresh button and a container for the logs
+    const responseHtml = `
+        <html>
+            <head>
+                <title>Trade Logs</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    p { margin: 5px 0; }
+                </style>
+            </head>
+            <body>
+                <h1>Trade Logs</h1>
+                <button id="refreshButton">Refresh Log</button>
+                <div id="logContainer"></div>
+                <script>
+                    // Function to fetch and update the logs
+                    function fetchAndUpdateLogs() {
+                        fetch('/fetch-logs')
+                            .then(response => response.text())
+                            .then(data => {
+                                const logContainer = document.getElementById('logContainer');
+                                logContainer.innerHTML = data;
+                            })
+                            .catch(err => console.error('Error fetching logs:', err));
+                    }
+
+                    // Initial fetch of the logs
+                    fetchAndUpdateLogs();
+
+                    // Attach event listener to the Refresh button
+                    document.getElementById('refreshButton').addEventListener('click', fetchAndUpdateLogs);
+                </script>
+            </body>
+        </html>
+    `;
+
+    // Send the HTML response with the Refresh button and script
+    res.send(responseHtml);
+});
+
+// Additional route to handle fetching logs without page refresh
+app.get('/fetch-logs', (req, res) => {
+    fs.readFile('trade_logs.txt', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading trade logs:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        // Format the log data for HTML
+        const formattedData = data.split('\n').map(line => `<p>${line}</p>`).join('');
+        res.send(formattedData);
+    });
+});
+
+
 app.get('/login/callback', (req, res) => {
     const requestToken = req.query.request_token;
     if (requestToken) {
@@ -82,7 +138,7 @@ app.get('/login/callback', (req, res) => {
                 // });
                 // console.log("instrument saved at instruments.json")
 
-                res.redirect('/kite');
+                res.redirect('/logs');
             })
             .catch(err => {
                 console.error('Error obtaining access token:', err);
