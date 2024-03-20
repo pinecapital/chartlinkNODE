@@ -67,6 +67,7 @@ app.get('/login/callback', (req, res) => {
                 kite.setAccessToken(currentAccessToken);
                 kite.getProfile().then(profile => {
                     console.log(`Logged in as: ${profile.user_id}`);
+                    console.log(`press enter after login.`)
                 }).catch(err => console.log(err));
                 // console.log("Downloading Instruments NFO")
                 // Fetch instruments for NFO and save to instruments.json
