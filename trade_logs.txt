@@ -10,3 +10,5 @@
 3/19/2024, 1:22:55 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 44.05 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290
 3/19/2024, 1:23:32 PM: Order processed for RELIANCE24MAR2840CE based on alert for RELIANCE
 3/19/2024, 1:23:32 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 43.65 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290
+3/20/2024, 12:15:17 PM: Order processed for ICICIPRULI24MAR565PE based on alert for ICICIPRULI
+3/20/2024, 12:15:18 PM: placing order for ICICIPRULI24MAR565PE with qty 1500 at price 13.3 with TP % 1 and SL% 1 and lot size 1500 and tick size 0.05 and instrument token 32463618
