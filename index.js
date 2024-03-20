@@ -5,6 +5,8 @@ require('dotenv').config();
 const { readInstrumentsToDataFrame, filterOptions } = require('./getToken');
 
 const express = require('express');
+const express = require('express-session')
+
 const bodyParser = require('body-parser');
 const WebSocket = require('ws');
 
@@ -19,7 +21,13 @@ const port = process.env.PORT || config.port;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-
+app.use(session({
+    secret: config.session.secret, // Secret key to sign the session ID cookie
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: true, // Don't create session until something stored
+    cookie: { secure: true } // True for HTTPS
+  }));
+  
 
 function logTradeActivity(logMessage) {
     const timestamp = new Date().toLocaleString();
@@ -61,6 +69,20 @@ app.get('/kite', (req, res) => {
 });
 
 app.get('/logs', (req, res) => {
+    const updateForm = req.session.isLoggedIn ? `
+        <h2>Update TPSL Settings</h2>
+        <form action="/update-tpsl" method="post">
+            <label for="symbol">Symbol:</label>
+            <input type="text" id="symbol" name="symbol" required>
+            <label for="qty">Quantity:</label>
+            <input type="number" id="qty" name="qty" required>
+            <label for="tp">Take Profit (%):</label>
+            <input type="number" id="tp" name="tp" required>
+            <label for="sl">Stop Loss (%):</label>
+            <input type="number" id="sl" name="sl" required>
+            <button type="submit">Update TPSL</button>
+        </form>
+    ` : '';
     // Endpoint HTML template with a Refresh button and a container for the logs
     const responseHtml = `
         <html>
@@ -114,6 +136,29 @@ app.get('/fetch-logs', (req, res) => {
         res.send(formattedData);
     });
 });
+app.post('/update-tpsl', (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.status(403).send('Unauthorized');
+    }
+
+    const { symbol, qty, tp, sl } = req.body;
+    fs.readFile('tpsl.json', 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const tpsl = JSON.parse(data);
+        tpsl[symbol] = { qty: parseInt(qty, 10), tp: parseFloat(tp), sl: parseFloat(sl) };
+
+        fs.writeFile('tpsl.json', JSON.stringify(tpsl, null, 2), 'utf8', (err) => {
+            if (err) {
+                return res.status(500).send('Internal Server Error');
+            }
+
+            res.send('TPSL updated successfully');
+        });
+    });
+});
 
 
 app.get('/login/callback', (req, res) => {
@@ -123,6 +168,7 @@ app.get('/login/callback', (req, res) => {
             .then(response => {
                 currentAccessToken = response.access_token; // Update the in-memory token
                 console.log("accesstoken after login",currentAccessToken)
+                req.session.isLoggedIn = true;
                 kite.setAccessToken(currentAccessToken);
                 kite.getProfile().then(profile => {
                     console.log(`Logged in as: ${profile.user_id}`);
@@ -308,9 +354,9 @@ const sslOptions = {
   };
   
 
-https.createServer(sslOptions, app).listen(port, () => {
-    console.log(`Server running on https://localhost:${port}`);
-    console.log(`open this link in browser http://localhost:${port}/kite`)
+https.createServer(sslOptions, app).listen(config.port, () => {
+    console.log(`Server running on https://localhost:${config.port}`);
+    console.log(`open this link in browser http://localhost:${config.port}/kite`)
 
   });
   
