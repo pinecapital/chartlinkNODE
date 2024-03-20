@@ -9,7 +9,7 @@ const KiteConnect = require("kiteconnect").KiteConnect;
 const KiteTicker = require("kiteconnect").KiteTicker;
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 80;
 
 // Middleware to parse request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
