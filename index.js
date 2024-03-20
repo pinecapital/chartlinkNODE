@@ -1,3 +1,5 @@
+const https = require('https');
+
 require('dotenv').config();
 const { readInstrumentsToDataFrame, filterOptions } = require('./getToken');
 
@@ -9,7 +11,7 @@ const KiteConnect = require("kiteconnect").KiteConnect;
 const KiteTicker = require("kiteconnect").KiteTicker;
 
 const app = express();
-const port = process.env.PORT || 80;
+const port = process.env.PORT || config.port;
 
 // Middleware to parse request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -243,8 +245,15 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol) {
     });
 
 }
+const sslOptions = {
+    key: fs.readFileSync(config.ssl_key_path),
+    cert: fs.readFileSync(config.ssl_cert_path)
+  };
+  
 
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+https.createServer(sslOptions, app).listen(port, () => {
+    console.log(`Server running on https://localhost:${port}`);
     console.log(`open this link in browser http://localhost:${port}/kite`)
-});
+
+  });
+  
