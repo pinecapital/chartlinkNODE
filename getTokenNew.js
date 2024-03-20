@@ -10,25 +10,22 @@ function filterOptions(instruments, symbol, optionType, currentPrice) {
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
 
-    // Filter options based on current year, month, symbol, and option type (CE/PE for calls/puts)
     let options = instruments.filter(inst => {
-        let expiryDate = new Date(inst.expiry); // Parse expiry date string into a Date object
+        let expiryDate = new Date(inst.expiry);
         return expiryDate.getFullYear() === currentYear &&
                expiryDate.getMonth() + 1 === currentMonth &&
-               inst.name === symbol && // Match the instrument symbol
-               inst.instrument_type === optionType; // Match the option type (CE/PE)
+               inst.name === symbol &&
+               inst.instrument_type === optionType;
     });
 
-    // Calculate the difference between the instrument's strike price and the current price
     options.forEach(option => {
         option.strike_diff = Math.abs(option.strike - currentPrice);
     });
 
-    // Sort options by the difference between strike price and current price to find the ATM option
+    // Find the option with the strike price closest to the current price (ATM)
     options.sort((a, b) => a.strike_diff - b.strike_diff);
     const atmOption = options.find(option => option.strike_diff === options[0].strike_diff);
 
-    // Return the ATM option's details if found
     if (atmOption) {
         return {
             tradingsymbol: atmOption.tradingsymbol,
@@ -37,7 +34,7 @@ function filterOptions(instruments, symbol, optionType, currentPrice) {
             tick_size: atmOption.tick_size
         };
     } else {
-        return null; // Return null if no matching option is found
+        return null;
     }
 }
 

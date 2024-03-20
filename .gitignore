@@ -1,3 +1,7 @@
 node_modules
 config.json
 token.json
+trade_logs.txt
+ltp_logs.txt
+getTokenNew.json
+accessToken.json

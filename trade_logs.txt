@@ -1,0 +1,12 @@
+3/19/2024, 12:47:22 PM: Order processed for RELIANCE24MAR2840CE based on alert for RELIANCE
+3/19/2024, 12:47:22 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 45 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290
+3/19/2024, 1:15:26 PM: Order processed for RELIANCE24MAR2840CE based on alert for RELIANCE
+3/19/2024, 1:15:26 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 44.4 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290
+3/19/2024, 1:17:07 PM: Order processed for RELIANCE24MAR2840CE based on alert for RELIANCE
+3/19/2024, 1:17:08 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 44.35 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290
+3/19/2024, 1:21:00 PM: Order processed for RELIANCE24MAR2840CE based on alert for RELIANCE
+3/19/2024, 1:21:01 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 43.3 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290
+3/19/2024, 1:22:54 PM: Order processed for RELIANCE24MAR2840CE based on alert for RELIANCE
+3/19/2024, 1:22:55 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 44.05 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290
+3/19/2024, 1:23:32 PM: Order processed for RELIANCE24MAR2840CE based on alert for RELIANCE
+3/19/2024, 1:23:32 PM: placing order for RELIANCE24MAR2840CE with qty 250 at price 43.65 with TP % 1 and SL% 1 and lot size 250 and tick size 0.05 and instrument token 49260290

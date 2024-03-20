@@ -1,0 +1,17 @@
+{
+  "DEFAULT": {
+    "qty": 1,
+    "tp": 1,
+    "sl": 1
+  },
+  "SBIN": {
+    "qty": 1,
+    "tp": 1,
+    "sl": 1
+  },
+  "RELIANCE": {
+    "qty": 1,
+    "tp": 1,
+    "sl": 1
+  }
+}
