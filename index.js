@@ -1,12 +1,14 @@
 const https = require('https');
-
+const fs = require('fs');
+const config = JSON.parse(fs.readFileSync('config.json'));
 require('dotenv').config();
 const { readInstrumentsToDataFrame, filterOptions } = require('./getToken');
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const WebSocket = require('ws');
-const fs = require('fs');
+
+
 const KiteConnect = require("kiteconnect").KiteConnect;
 const KiteTicker = require("kiteconnect").KiteTicker;
 
@@ -32,7 +34,6 @@ function logLtpActivity(logMessage) {
 }
 
 // Load configuration
-const config = JSON.parse(fs.readFileSync('config.json'));
 
 const kite = new KiteConnect({
     api_key: config.api_key
