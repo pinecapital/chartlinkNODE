@@ -122,6 +122,63 @@ app.get('/logs', (req, res) => {
     // Send the HTML response with the Refresh button and script
     res.send(responseHtml);
 });
+app.get('/tpsl-settings', (req, res) => {
+    if (!req.session.isLoggedIn) {
+        return res.status(403).send('Unauthorized access. Please log in first.');
+    }
+
+    fs.readFile('tpsl.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading TPSL settings:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const tpsl = JSON.parse(data);
+        let formHtml = `<form action="/update-tpsl" method="post">`;
+
+        // Loop through each TPSL setting and create input fields for them
+        Object.entries(tpsl).forEach(([symbol, settings]) => {
+            formHtml += `
+                <fieldset>
+                    <legend>${symbol}</legend>
+                    <label for="${symbol}_qty">Quantity:</label>
+                    <input type="number" id="${symbol}_qty" name="${symbol}[qty]" value="${settings.qty}" required><br>
+                    <label for="${symbol}_tp">Take Profit (%):</label>
+                    <input type="number" step="0.01" id="${symbol}_tp" name="${symbol}[tp]" value="${settings.tp}" required><br>
+                    <label for="${symbol}_sl">Stop Loss (%):</label>
+                    <input type="number" step="0.01" id="${symbol}_sl" name="${symbol}[sl]" value="${settings.sl}" required>
+                </fieldset>`;
+        });
+
+        // Add a section to add a new stock configuration
+        formHtml += `
+            <fieldset>
+                <legend>New Stock</legend>
+                <label for="new_stock">Symbol:</label>
+                <input type="text" id="new_stock" name="new_stock"><br>
+                <label for="new_qty">Quantity:</label>
+                <input type="number" id="new_qty" name="new_stock[qty]"><br>
+                <label for="new_tp">Take Profit (%):</label>
+                <input type="number" step="0.01" id="new_tp" name="new_stock[tp]"><br>
+                <label for="new_sl">Stop Loss (%):</label>
+                <input type="number" step="0.01" id="new_sl" name="new_stock[sl]">
+            </fieldset>
+            <button type="submit">Update TPSL Settings</button>
+        </form>`;
+
+        res.send(`
+            <html>
+                <head>
+                    <title>TPSL Settings</title>
+                </head>
+                <body>
+                    <h1>TPSL Settings</h1>
+                    ${formHtml}
+                </body>
+            </html>
+        `);
+    });
+});
 
 // Additional route to handle fetching logs without page refresh
 app.get('/fetch-logs', (req, res) => {
@@ -136,26 +193,59 @@ app.get('/fetch-logs', (req, res) => {
         res.send(formattedData);
     });
 });
+// app.post('/update-tpsl', (req, res) => {
+//     if (!req.session.isLoggedIn) {
+//         return res.status(403).send('Unauthorized');
+//     }
+
+//     const { symbol, qty, tp, sl } = req.body;
+//     fs.readFile('tpsl.json', 'utf8', (err, data) => {
+//         if (err) {
+//             return res.status(500).send('Internal Server Error');
+//         }
+
+//         const tpsl = JSON.parse(data);
+//         tpsl[symbol] = { qty: parseInt(qty, 10), tp: parseFloat(tp), sl: parseFloat(sl) };
+
+//         fs.writeFile('tpsl.json', JSON.stringify(tpsl, null, 2), 'utf8', (err) => {
+//             if (err) {
+//                 return res.status(500).send('Internal Server Error');
+//             }
+
+//             res.send('TPSL updated successfully');
+//         });
+//     });
+// });
+
 app.post('/update-tpsl', (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.status(403).send('Unauthorized');
     }
 
-    const { symbol, qty, tp, sl } = req.body;
+    const newSettings = req.body;
+    const newStock = newSettings.new_stock;
+    delete newSettings.new_stock; // Remove the new stock entry from the existing settings
+
+    // Update existing settings and add new stock if provided
     fs.readFile('tpsl.json', 'utf8', (err, data) => {
         if (err) {
+            console.error('Error reading TPSL settings:', err);
             return res.status(500).send('Internal Server Error');
         }
 
         const tpsl = JSON.parse(data);
-        tpsl[symbol] = { qty: parseInt(qty, 10), tp: parseFloat(tp), sl: parseFloat(sl) };
+        Object.assign(tpsl, newSettings);
+
+        if (newStock && newStock !== '') {
+            tpsl[newStock] = newSettings['new_stock'];
+        }
 
         fs.writeFile('tpsl.json', JSON.stringify(tpsl, null, 2), 'utf8', (err) => {
             if (err) {
+                console.error('Error updating TPSL settings:', err);
                 return res.status(500).send('Internal Server Error');
             }
-
-            res.send('TPSL updated successfully');
+            res.send('TPSL settings updated successfully');
         });
     });
 });
