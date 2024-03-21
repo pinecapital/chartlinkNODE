@@ -393,7 +393,7 @@ app.post('/chartlink', (req, res) => {
 
                 console.log(`subscribing ltp for ${[atmOption.instrument_token]}`)
 
-                startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP,tradingsymbol);
+                startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP,tradingsymbol,tickSize,qty);
 
 
             }).catch(err => logLtpActivity(`Error getting LTP for ${tradingsymbol}: ${err}`));
@@ -411,7 +411,7 @@ app.post('/chartlink', (req, res) => {
 });
 
 
-function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol) {
+function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol,tick_size,qty) {
     if (!isTokenValid()) {
         console.error('Access token is invalid or expired. Please log in again.');
         // You might want to handle re-login here or notify the user to re-login
@@ -457,8 +457,7 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol) {
                 // Place a sell order (simplified version)
 
                 logTradeActivity(`Exiting position for tradingsymbol ${tradingsymbol} token number ${tick.instrument_token} at price ${currentPrice}`);
-                const tickSize = atmOption.tick_size; // Assuming you have this value
-                placeLimitOrder(tradingsymbol, qty, currentPrice, "SELL", tickSize);
+                placeLimitOrder(tradingsymbol, qty, currentPrice, "SELL", tick_size);
 
                 positionExited = true;
                 kws.unsubscribe(tokens); // Unsubscribe from ticker updates for this token
