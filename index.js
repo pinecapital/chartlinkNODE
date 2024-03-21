@@ -27,8 +27,34 @@ app.use(session({
     saveUninitialized: true, // Don't create session until something stored
     cookie: { secure: true } // True for HTTPS
   }));
-  
 
+// get details 
+const getTokenDetails = () => {
+    if (fs.existsSync('tokenDetails.json')) {
+        return JSON.parse(fs.readFileSync('tokenDetails.json', 'utf8'));
+    }
+    return null;
+};
+// save token 
+const saveTokenDetails = (token) => {
+    const tokenDetails = {
+        accessToken: token,
+        lastSaved: new Date().toISOString() // Save the current date and time
+    };
+    fs.writeFileSync('tokenDetails.json', JSON.stringify(tokenDetails, null, 2), 'utf8');
+};
+const isTokenValid = () => {
+    const tokenDetails = getTokenDetails();
+    if (!tokenDetails) return false;
+
+    const lastSaved = new Date(tokenDetails.lastSaved);
+    const lastSavedDayStart = new Date(lastSaved).setHours(0, 0, 0, 0);
+    const today6AM = new Date().setHours(6, 0, 0, 0);
+    const now = new Date();
+
+    // Check if the current time is past today's 6 AM and the token was last saved before today's 6 AM
+    return now >= today6AM && lastSaved >= today6AM || lastSavedDayStart < today6AM;
+};
 function logTradeActivity(logMessage) {
     const timestamp = new Date().toLocaleString();
     const logEntry = `${timestamp}: ${logMessage}\n`;
@@ -234,9 +260,25 @@ app.get('/login/callback', (req, res) => {
     if (requestToken) {
         kite.generateSession(requestToken, config.api_secret)
             .then(response => {
-                currentAccessToken = response.access_token; // Update the in-memory token
+                const tokenDetails = getTokenDetails();
+
+                // Check if the existing token is still valid
+                if (isTokenValid()) {
+                    // Token is still valid, use the existing token details
+                    currentAccessToken = tokenDetails.accessToken;
+                    console.log("Using existing access token from saved details.");
+                } else {
+                    // Token is expired, save the new token details from the login response
+                    saveTokenDetails(response.access_token);
+                    currentAccessToken = response.access_token; // Use the new token
+                    console.log("New access token obtained and saved.");
+                }
+
+
+
                 console.log("accesstoken after login",currentAccessToken)
                 req.session.isLoggedIn = true;
+
                 kite.setAccessToken(currentAccessToken);
                 kite.getProfile().then(profile => {
                     console.log(`Logged in as: ${profile.user_id}`);
@@ -340,6 +382,15 @@ app.post('/chartlink', (req, res) => {
 
 
 function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol) {
+    if (!isTokenValid()) {
+        console.error('Access token is invalid or expired. Please log in again.');
+        // You might want to handle re-login here or notify the user to re-login
+        return;
+    }
+    // If the token is valid, proceed with using it
+    const tokenDetails = getTokenDetails();
+    const accessToken = tokenDetails.accessToken;
+
     console.log(`current apikey for subscription ${apiKey}`)
 
     console.log(`current tokens for subscription ${tokens}`)
@@ -348,14 +399,14 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol) {
     console.log(`current stoploss ${tpConfig.sl}`)
     console.log(`current takeprofit ${tpConfig.tp}`)
     console.log(`acccess token for subscription ${currentAccessToken}`)
-    if (!currentAccessToken) {
-        console.error('Access token is not set. Make sure to log in first.');
-        return;
-    }
+    // if (!currentAccessToken) {
+    //     console.error('Access token is not set. Make sure to log in first.');
+    //     return;
+    // }
 
     const kws = new KiteTicker({
         api_key: apiKey,
-        access_token: currentAccessToken // Use the in-memory token
+        access_token: accessToken // Use the in-memory token
     });
 
     let positionExited = false;
