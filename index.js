@@ -393,7 +393,7 @@ app.post('/chartlink', (req, res) => {
 
                 console.log(`subscribing ltp for ${[atmOption.instrument_token]}`)
 
-                startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP,tradingsymbol,tickSize,qty);
+                startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP,tradingsymbol,atmOption.tick_size,qty);
 
 
             }).catch(err => logLtpActivity(`Error getting LTP for ${tradingsymbol}: ${err}`));
