@@ -89,8 +89,8 @@ function adjustToTickSize(price, tickSize) {
 function placeLimitOrder(tradingsymbol, quantity, price, transactionType, tickSize) {
     // Adjust the price by 1% up for BUY orders, 1% down for SELL orders
     const adjustedPrice = transactionType === "BUY"
-        ? adjustToTickSize(price * 1.02, tickSize) // 1% above for buy orders
-        : adjustToTickSize(price * 0.98, tickSize); // 1% below for sell orders
+        ? adjustToTickSize(price * 1.1, tickSize) // 1% above for buy orders
+        : adjustToTickSize(price * 0.90, tickSize); // 1% below for sell orders
 
     kite.placeOrder("regular", {
         exchange: "NFO",
