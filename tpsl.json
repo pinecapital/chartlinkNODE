@@ -6,12 +6,137 @@
   },
   "SBIN": {
     "qty": 1,
-    "tp": 1,
-    "sl": 1
+    "tp": 5,
+    "sl": 10
   },
   "RELIANCE": {
     "qty": 1,
-    "tp": 1,
-    "sl": 1
+    "tp": 5,
+    "sl": 10
+  },
+  "AARTIIND": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "AUROPHARMA": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "MARICO": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "GNFC": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "BERGEPAINT": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "IGL": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "HINDALCO": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "TATAMOTORS": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "ICICIPRULI": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "BALRAMCHIN": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "DLF": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "APOLLOTYRE": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "AMBUJACEM": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "CHAMBLFERT": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "GRANULES": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "COALINDIA": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "VEDL": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "BANDHANBNK": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "ABFRL": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "CANBK": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "INDIACEM": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "BANKBARODA": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "DELTACORP": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "TATAPOWER": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "INDUSTOWER": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
   }
 }

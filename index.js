@@ -68,6 +68,47 @@ function logLtpActivity(logMessage) {
 }
 
 // Load configuration
+/**
+ * Adjusts the given price to the nearest valid tick size.
+ * @param {number} price The price to be adjusted.
+ * @param {number} tickSize The minimum tick size for the instrument.
+ * @returns {number} The adjusted price.
+ */
+function adjustToTickSize(price, tickSize) {
+    return Math.round(price / tickSize) * tickSize;
+}
+
+/**
+ * Places a limit order with a price adjusted by 1% up or down based on the transaction type.
+ * @param {string} tradingsymbol The symbol for the instrument.
+ * @param {number} quantity The quantity to order.
+ * @param {number} price The current market price for the limit order adjustment.
+ * @param {string} transactionType 'BUY' or 'SELL'.
+ * @param {number} tickSize The minimum tick size for the instrument.
+ */
+function placeLimitOrder(tradingsymbol, quantity, price, transactionType, tickSize) {
+    // Adjust the price by 1% up for BUY orders, 1% down for SELL orders
+    const adjustedPrice = transactionType === "BUY"
+        ? adjustToTickSize(price * 1.01, tickSize) // 1% above for buy orders
+        : adjustToTickSize(price * 0.99, tickSize); // 1% below for sell orders
+
+    kite.placeOrder("regular", {
+        exchange: "NFO",
+        tradingsymbol: tradingsymbol,
+        transaction_type: transactionType,
+        quantity: quantity,
+        order_type: "LIMIT",
+        price: adjustedPrice,
+        product: "NRML"
+    }).then(response => {
+        logTradeActivity(`Limit order placed. ID: ${response.order_id}, Symbol: ${tradingsymbol}, Quantity: ${quantity}, Price: ${adjustedPrice}, Type: ${transactionType}`);
+    }).catch(err => {
+        logTradeActivity(`Error placing limit order for ${tradingsymbol}: ${err.message}`);
+        console.error(`Error placing limit order for ${tradingsymbol}`, err);
+    });
+}
+
+
 
 const kite = new KiteConnect({
     api_key: config.api_key
@@ -345,22 +386,11 @@ app.post('/chartlink', (req, res) => {
                 console.log(`LTP for ${tradingsymbol}: ${optionLTP}`);
                 const qty = tpConfig.qty * atmOption.lot_size;
                 logTradeActivity(`placing order for ${tradingsymbol} with qty ${qty} at price ${optionLTP} with TP % ${tpConfig.tp} and SL% ${tpConfig.sl} and lot size ${atmOption.lot_size} and tick size ${atmOption.tick_size} and instrument token ${atmOption.instrument_token}`);
-                
+                const tickSize = atmOption.tick_size; // Assuming you have this value from your instrument data
+                placeLimitOrder(tradingsymbol, qty, optionLTP, "BUY", tickSize);
+
             
-                // Place the first buy order.
-                // kite.placeOrder("regular", {
-                //     exchange: "NFO",
-                //     tradingsymbol: tradingsymbol,
-                //     transaction_type: "BUY",
-                //     quantity: qty,
-                //     order_type: "MARKET",
-                //     product: "NRML"
-                // }).then(response => {
-                //     console.log("Order placed successfully", response);
-                //     // You might want to save the order ID for managing TP/SL
-                // }).catch(err => 
-                //     console.log("Order placement failed", err);
-                // });
+
                 console.log(`subscribing ltp for ${[atmOption.instrument_token]}`)
 
                 startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP,tradingsymbol);
@@ -423,22 +453,13 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol) {
 
 
             if (currentPrice >= tpPrice || currentPrice <= slPrice) {
+                
                 // Place a sell order (simplified version)
-                // kite.placeOrder("regular", {
-                //     exchange: "NFO",
-                //     tradingsymbol: tradingsymbol,
-                //     transaction_type: "SELL",
-                //     quantity: qty,
-                //     order_type: "MARKET",
-                //     product: "NRML"
-                // }
+
                 logTradeActivity(`Exiting position for tradingsymbol ${tradingsymbol} token number ${tick.instrument_token} at price ${currentPrice}`);
-                // ).then(response => {
-                //     console.log("Order placed successfully", response);
-                //     // You might want to save the order ID for managing TP/SL
-                // }).catch(err => {
-                //     console.log("Order placement failed", err);
-                // });
+                const tickSize = atmOption.tick_size; // Assuming you have this value
+                placeLimitOrder(tradingsymbol, qty, currentPrice, "SELL", tickSize);
+
                 positionExited = true;
                 kws.unsubscribe(tokens); // Unsubscribe from ticker updates for this token
                 kws.disconnect(); // 
