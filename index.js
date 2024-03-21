@@ -290,7 +290,21 @@ app.post('/update-tpsl', (req, res) => {
                 console.error('Error updating TPSL settings:', err);
                 return res.status(500).send('Internal Server Error');
             }
-            res.send('TPSL settings updated successfully');
+                        // Send a response with buttons to navigate back to the logs or TPSL settings page
+            res.send(`
+            <html>
+                <head>
+                    <title>TPSL Update Confirmation</title>
+                </head>
+                <body>
+                    <h1>TPSL settings updated successfully</h1>
+                    <div>
+                        <a href="/logs"><button>Go Back to Logs</button></a>
+                        <a href="/tpsl-settings"><button>Return to TPSL Settings</button></a>
+                    </div>
+                </body>
+            </html>
+        `);
         });
     });
 });
