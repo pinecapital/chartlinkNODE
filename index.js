@@ -26,7 +26,7 @@ app.use(session({
     resave: false, // Don't save session if unmodified
     saveUninitialized: true, // Don't create session until something stored
     cookie: { secure: true } // True for HTTPS
-  }));
+}));
 
 
 // get details 
@@ -265,9 +265,14 @@ app.get('/tpsl-settings', (req, res) => {
             <html>
                 <head>
                     <title>TPSL Settings</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        a.button { display: inline-block; margin-top: 20px; padding: 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+                    </style>
                 </head>
                 <body>
                     <h1>TPSL Settings</h1>
+                    <a href="/logs" class="button">Back to Logs</a>
                     ${formHtml}
                 </body>
             </html>
@@ -318,7 +323,7 @@ app.post('/update-tpsl', (req, res) => {
                 console.error('Error updating TPSL settings:', err);
                 return res.status(500).send('Internal Server Error');
             }
-                        // Send a response with buttons to navigate back to the logs or TPSL settings page
+            // Send a response with buttons to navigate back to the logs or TPSL settings page
             res.send(`
             <html>
                 <head>
@@ -359,7 +364,7 @@ app.get('/login/callback', (req, res) => {
 
 
 
-                console.log("accesstoken after login",currentAccessToken)
+                console.log("accesstoken after login", currentAccessToken)
                 req.session.isLoggedIn = true;
 
                 kite.setAccessToken(currentAccessToken);
@@ -407,17 +412,17 @@ app.post('/chartlink', (req, res) => {
 
         // Get the instrument data (you need to implement readInstrumentsToDataFrame)
         const instruments = readInstrumentsToDataFrame('instruments.json');
-        
+
         // Filter for the ATM option based on the optionType and triggerPrice
         const atmOption = filterOptions(instruments, stock, optionType, triggerPrice);
-        const tpsl = JSON.parse(fs.readFileSync('tpsl.json','utf8'));
+        const tpsl = JSON.parse(fs.readFileSync('tpsl.json', 'utf8'));
         const tpConfig = tpsl[stock] || tpsl["DEFAULT"];
-    
+
         if (!tpConfig) {
             console.log(`Configuration for ${stock} not found`);
             return res.redirect('/');
         }
-    
+
 
         if (atmOption) {
             const tradingsymbol = atmOption.tradingsymbol;
@@ -431,11 +436,11 @@ app.post('/chartlink', (req, res) => {
                 const tickSize = atmOption.tick_size; // Assuming you have this value from your instrument data
                 placeLimitOrder(tradingsymbol, qty, optionLTP, "BUY", tickSize);
 
-            
+
 
                 console.log(`subscribing ltp for ${[atmOption.instrument_token]}`)
 
-                startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP,tradingsymbol,atmOption.tick_size,qty);
+                startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP, tradingsymbol, atmOption.tick_size, qty);
 
 
             }).catch(err => logLtpActivity(`Error getting LTP for ${tradingsymbol}: ${err}`));
@@ -453,7 +458,7 @@ app.post('/chartlink', (req, res) => {
 });
 
 
-function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol,tick_size,qty) {
+function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, tick_size, qty) {
     if (!isTokenValid()) {
         console.error('Access token is invalid or expired. Please log in again.');
         // You might want to handle re-login here or notify the user to re-login
@@ -485,7 +490,7 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol,tick
 
     kws.connect();
     kws.on('ticks', ticks => {
-        if (positionExited) return; 
+        if (positionExited) return;
 
         ticks.forEach(tick => {
             const currentPrice = tick.last_price;
@@ -495,7 +500,7 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol,tick
 
 
             if (currentPrice >= tpPrice || currentPrice <= slPrice) {
-                
+
                 // Place a sell order (simplified version)
 
                 logTradeActivity(`Exiting position for tradingsymbol ${tradingsymbol} token number ${tick.instrument_token} at price ${currentPrice}`);
@@ -519,11 +524,11 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol,tick
     kws.on('disconnect', (reason) => {
         console.error(`WebSocket disconnected: ${reason}`);
     });
-    
+
     kws.on('error', (error) => {
         console.error(`WebSocket error: ${error.message}`);
     });
-    
+
     kws.on('reconnect', (attempt, delay) => {
         console.log(`Attempting to reconnect (Attempt: ${attempt}) in ${delay}ms`);
     });
@@ -532,12 +537,11 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice,tradingsymbol,tick
 const sslOptions = {
     key: fs.readFileSync(config.ssl_key_path),
     cert: fs.readFileSync(config.ssl_cert_path)
-  };
-  
+};
+
 
 https.createServer(sslOptions, app).listen(config.port, () => {
     console.log(`Server running on https://localhost:${config.port}`);
     console.log(`open this link in browser http://localhost:${config.port}/kite`)
 
-  });
-  
+});
