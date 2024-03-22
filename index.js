@@ -28,6 +28,7 @@ app.use(session({
     cookie: { secure: true } // True for HTTPS
   }));
 
+
 // get details 
 const getTokenDetails = () => {
     if (fs.existsSync('tokenDetails.json')) {
@@ -36,25 +37,32 @@ const getTokenDetails = () => {
     return null;
 };
 // save token 
+const TOKEN_LIFESPAN = 24 * 60 * 60 * 1000; // Example: 24 hours in milliseconds
+
 const saveTokenDetails = (token) => {
+    const now = new Date();
+    const expiryTime = new Date(now.getTime() + TOKEN_LIFESPAN).toISOString(); // Calculate expiry time
+
     const tokenDetails = {
         accessToken: token,
-        lastSaved: new Date().toISOString() // Save the current date and time
+        lastSaved: now.toISOString(),
+        expiryTime: expiryTime // Save expiry time
     };
+
     fs.writeFileSync('tokenDetails.json', JSON.stringify(tokenDetails, null, 2), 'utf8');
 };
+
 const isTokenValid = () => {
     const tokenDetails = getTokenDetails();
     if (!tokenDetails) return false;
 
-    const lastSaved = new Date(tokenDetails.lastSaved);
-    const lastSavedDayStart = new Date(lastSaved).setHours(0, 0, 0, 0);
-    const today6AM = new Date().setHours(6, 0, 0, 0);
     const now = new Date();
+    const expiryTime = new Date(tokenDetails.expiryTime);
 
-    // Check if the current time is past today's 6 AM and the token was last saved before today's 6 AM
-    return now >= today6AM && lastSaved >= today6AM || lastSavedDayStart < today6AM;
+    // Check if the current time is before the token's expiry time
+    return now < expiryTime;
 };
+
 function logTradeActivity(logMessage) {
     const timestamp = new Date().toLocaleString();
     const logEntry = `${timestamp}: ${logMessage}\n`;
