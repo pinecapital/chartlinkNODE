@@ -203,7 +203,23 @@ app.get('/logs', (req, res) => {
 });
 app.get('/tpsl-settings', (req, res) => {
     if (!req.session.isLoggedIn) {
-        return res.status(403).send('Unauthorized access. Please log in first.');
+        const loginButtonHtml = `
+        <html>
+            <head>
+                <title>Unauthorized Access</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                    a { display: inline-block; margin-top: 20px; padding: 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+                </style>
+            </head>
+            <body>
+                <h1>Unauthorized Access</h1>
+                <p>Please log in to access this page.</p>
+                <a href="/kite">Log In</a>
+            </body>
+        </html>
+    `;
+        return res.status(403).send(loginButtonHtml);
     }
 
     fs.readFile('tpsl.json', 'utf8', (err, data) => {
