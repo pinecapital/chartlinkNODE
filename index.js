@@ -169,12 +169,22 @@ app.get('/logs', (req, res) => {
                 <style>
                     body { font-family: Arial, sans-serif; }
                     p { margin: 5px 0; }
+                    a.button, button.button { /* Adjusted to apply styles to both anchor and button elements */
+                        display: inline-block;
+                        margin-top: 20px;
+                        padding: 10px;
+                        background-color: #007bff;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        cursor: pointer; /* Ensure the cursor changes to a pointer on hover for button elements */
+                    }
                 </style>
             </head>
             <body>
                 <h1>Trade Logs</h1>
                 ${tpslSettingsButton} <!-- Include the TPSL Settings button here -->
-                <button id="refreshButton">Refresh Log</button>
+                <button id="refreshButton" class="button">Refresh Log</button>
                 <div id="logContainer"></div>
                 <script>
                     // Function to fetch and update the logs
