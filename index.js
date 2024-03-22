@@ -177,7 +177,6 @@ app.get('/logs', (req, res) => {
                         color: white;
                         text-decoration: none;
                         border-radius: 5px;
-                        cursor: pointer; /* Ensure the cursor changes to a pointer on hover for button elements */
                     }
                 </style>
             </head>
