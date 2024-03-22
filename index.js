@@ -123,11 +123,11 @@ const kite = new KiteConnect({
 });
 
 let currentAccessToken = null;
+const kiteLoginURL = kite.getLoginURL();
 
 
 app.get('/kite', (req, res) => {
     // Generate the Kite login URL
-    const kiteLoginURL = kite.getLoginURL();
 
     // Send HTML response with the login button included
     res.send(`
@@ -215,8 +215,8 @@ app.get('/tpsl-settings', (req, res) => {
             <body>
                 <h1>Unauthorized Access</h1>
                 <p>Please log in to access this page.</p>
-                <a href="/kite">Log In</a>
-            </body>
+                <a href="${kiteLoginURL}">Log In with Kite</a> <!-- Directly use kiteLoginURL here -->
+                </body>
         </html>
     `;
         return res.status(403).send(loginButtonHtml);
