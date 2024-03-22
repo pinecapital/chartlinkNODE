@@ -219,13 +219,14 @@ app.get('/tpsl-settings', (req, res) => {
                 <title>Unauthorized Access</title>
                 <style>
                     body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                    a { display: inline-block; margin-top: 20px; padding: 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-                </style>
+                    .button { /* Use generic class for button styling */
+                    display: inline-block; margin-top: 20px; padding: 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;
+                }                </style>
             </head>
             <body>
                 <h1>Unauthorized Access</h1>
                 <p>Please log in to access this page.</p>
-                <a href="${kiteLoginURL}">Log In with Kite</a> <!-- Directly use kiteLoginURL here -->
+                <a href="${kiteLoginURL}" class="button" >Log In with Kite</a> <!-- Directly use kiteLoginURL here -->
                 </body>
         </html>
     `;
@@ -259,16 +260,16 @@ app.get('/tpsl-settings', (req, res) => {
         formHtml += `
             <fieldset>
                 <legend>New Stock</legend>
-                <label for="new_stock">Symbol:</label>
-                <input type="text" id="new_stock" name="new_stock"><br>
-                <label for="new_qty">Quantity:</label>
-                <input type="number" id="new_qty" name="new_stock[qty]"><br>
-                <label for="new_tp">Take Profit (%):</label>
-                <input type="number" step="0.01" id="new_tp" name="new_stock[tp]"><br>
-                <label for="new_sl">Stop Loss (%):</label>
-                <input type="number" step="0.01" id="new_sl" name="new_stock[sl]">
+                <label for="new_stock_symbol">Symbol:</label>
+                <input type="text" id="new_stock_symbol" name="new_stock[symbol]"><br>
+                <label for="new_stock_qty">Quantity:</label>
+                <input type="number" id="new_stock_qty" name="new_stock[qty]"><br>
+                <label for="new_stock_tp">Take Profit (%):</label>
+                <input type="number" step="0.01" id="new_stock_tp" name="new_stock[tp]"><br>
+                <label for="new_stock_sl">Stop Loss (%):</label>
+                <input type="number" step="0.01" id="new_stock_sl" name="new_stock[sl]">
             </fieldset>
-            <button type="submit">Update TPSL Settings</button>
+            <button type="submit" class="button">Update TPSL Settings</button>
         </form>`;
 
         res.send(`
@@ -310,44 +311,59 @@ app.post('/update-tpsl', (req, res) => {
         return res.status(403).send('Unauthorized');
     }
 
-    const newSettings = req.body;
-    const newStock = newSettings.new_stock;
-    delete newSettings.new_stock; // Remove the new stock entry from the existing settings
+    // Extract new stock data from the request body
+    const { new_stock } = req.body;
+    
+    // Remove 'new_stock' from the new settings to avoid conflicts
+    const updatedSettings = { ...req.body };
+    delete updatedSettings.new_stock;
 
-    // Update existing settings and add new stock if provided
     fs.readFile('tpsl.json', 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading TPSL settings:', err);
             return res.status(500).send('Internal Server Error');
         }
 
-        const tpsl = JSON.parse(data);
-        Object.assign(tpsl, newSettings);
+        // Parse the existing TPSL settings
+        const tpslSettings = JSON.parse(data);
 
-        if (newStock && newStock !== '') {
-            tpsl[newStock] = newSettings['new_stock'];
+        // Update existing settings
+        for (const symbol in updatedSettings) {
+            if (tpslSettings.hasOwnProperty(symbol)) {
+                tpslSettings[symbol] = { ...tpslSettings[symbol], ...updatedSettings[symbol] };
+            }
         }
 
-        fs.writeFile('tpsl.json', JSON.stringify(tpsl, null, 2), 'utf8', (err) => {
-            if (err) {
-                console.error('Error updating TPSL settings:', err);
+        // Add new stock, if provided and it includes the 'symbol' field
+        if (new_stock && new_stock.symbol) {
+            tpslSettings[new_stock.symbol] = {
+                qty: new_stock.qty,
+                tp: new_stock.tp,
+                sl: new_stock.sl
+            };
+        }
+
+        // Write the updated TPSL settings back to the file
+        fs.writeFile('tpsl.json', JSON.stringify(tpslSettings, null, 2), 'utf8', (writeErr) => {
+            if (writeErr) {
+                console.error('Error updating TPSL settings:', writeErr);
                 return res.status(500).send('Internal Server Error');
             }
-            // Send a response with buttons to navigate back to the logs or TPSL settings page
+
             res.send(`
-            <html>
-                <head>
-                    <title>TPSL Update Confirmation</title>
-                </head>
-                <body>
-                    <h1>TPSL settings updated successfully</h1>
-                    <div>
-                        <a href="/logs"><button>Go Back to Logs</button></a>
-                        <a href="/tpsl-settings"><button>Return to TPSL Settings</button></a>
-                    </div>
-                </body>
-            </html>
-        `);
+                <html>
+                    <head>
+                        <title>TPSL Update Confirmation</title>
+                    </head>
+                    <body>
+                        <h1>TPSL settings updated successfully</h1>
+                        <div>
+                            <a href="/logs" style="padding:10px;background-color:#007bff;color:white;text-decoration:none;border-radius:5px;">Go Back to Logs</a>
+                            <a href="/tpsl-settings" style="padding:10px;background-color:#007bff;color:white;text-decoration:none;border-radius:5px;margin-left:10px;">Return to TPSL Settings</a>
+                        </div>
+                    </body>
+                </html>
+            `);
         });
     });
 });
