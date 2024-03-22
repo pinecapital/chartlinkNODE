@@ -158,6 +158,9 @@ app.get('/logs', (req, res) => {
             <button type="submit">Update TPSL</button>
         </form>
     ` : '';
+    // Add a button to navigate to the TPSL settings page
+    const tpslSettingsButton = `<a href="/tpsl-settings" style="display:inline-block; margin-top:20px; padding:10px; background-color:#007bff; color:white; text-decoration:none; border-radius:5px;">TPSL Settings</a>`;
+
     // Endpoint HTML template with a Refresh button and a container for the logs
     const responseHtml = `
         <html>
@@ -170,6 +173,7 @@ app.get('/logs', (req, res) => {
             </head>
             <body>
                 <h1>Trade Logs</h1>
+                ${tpslSettingsButton} <!-- Include the TPSL Settings button here -->
                 <button id="refreshButton">Refresh Log</button>
                 <div id="logContainer"></div>
                 <script>
