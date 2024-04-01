@@ -313,7 +313,7 @@ app.post('/update-tpsl', (req, res) => {
 
     // Extract new stock data from the request body
     const { new_stock } = req.body;
-    
+
     // Remove 'new_stock' from the new settings to avoid conflicts
     const updatedSettings = { ...req.body };
     delete updatedSettings.new_stock;
@@ -422,6 +422,7 @@ app.get('/login/callback', (req, res) => {
 
 app.post('/chartlink', (req, res) => {
     // Assuming the message is sent in the request body
+    logTradeActivity(`Received message from chartlink: ${JSON.stringify(req.body)}`);
 
     if (!req.body.stocks || !req.body.trigger_prices) {
         return res.status(400).send('Missing required fields: stocks or trigger_prices');
@@ -430,53 +431,66 @@ app.post('/chartlink', (req, res) => {
     const stocks = message.stocks.split(',');
     const triggerPrices = message.trigger_prices.split(',').map(price => parseFloat(price));
     const isCE = message.scan_name.includes('"CE"'); // Determine if it's CE or PE from the scan_name
+    const tpsl = JSON.parse(fs.readFileSync('tpsl.json', 'utf8'));
 
     // Process each stock symbol
     stocks.forEach((stock, index) => {
         const triggerPrice = triggerPrices[index];
         const optionType = isCE ? 'CE' : 'PE'; // Option type based on the scan_name
-
-        // Get the instrument data (you need to implement readInstrumentsToDataFrame)
-        const instruments = readInstrumentsToDataFrame('instruments.json');
-
-        // Filter for the ATM option based on the optionType and triggerPrice
-        const atmOption = filterOptions(instruments, stock, optionType, triggerPrice);
-        const tpsl = JSON.parse(fs.readFileSync('tpsl.json', 'utf8'));
-        const tpConfig = tpsl[stock] || tpsl["DEFAULT"];
-
-        if (!tpConfig) {
-            console.log(`Configuration for ${stock} not found`);
-            return res.redirect('/');
+        // Check if the stock has specific TPSL settings
+        if (!tpsl.hasOwnProperty(stock)) {
+            console.log(`No TPSL settings found for ${stock}, skipping.`);
+            logTradeActivity(`No TPSL settings found for ${stock}, skipping.`);
+            return; // Skip this stock if no specific settings are found
         }
+        const tpConfig = tpsl[stock]; // Use only specific settings for the stock
+        if (tpConfig) {
 
 
-        if (atmOption) {
-            const tradingsymbol = atmOption.tradingsymbol;
-            console.log(tradingsymbol)
-            kite.getLTP(`NFO:${tradingsymbol}`).then(ltpResponse => {
-                console.log(`LTP fetched for ${tradingsymbol}:`, ltpResponse);
-                const optionLTP = ltpResponse[`NFO:${tradingsymbol}`].last_price;
-                console.log(`LTP for ${tradingsymbol}: ${optionLTP}`);
-                const qty = tpConfig.qty * atmOption.lot_size;
-                logTradeActivity(`placing order for ${tradingsymbol} with qty ${qty} at price ${optionLTP} with TP % ${tpConfig.tp} and SL% ${tpConfig.sl} and lot size ${atmOption.lot_size} and tick size ${atmOption.tick_size} and instrument token ${atmOption.instrument_token}`);
-                const tickSize = atmOption.tick_size; // Assuming you have this value from your instrument data
-                placeLimitOrder(tradingsymbol, qty, optionLTP, "BUY", tickSize);
+            // Get the instrument data (you need to implement readInstrumentsToDataFrame)
+            const instruments = readInstrumentsToDataFrame('instruments.json');
+
+            // Filter for the ATM option based on the optionType and triggerPrice
+            const atmOption = filterOptions(instruments, stock, optionType, triggerPrice);
+
+            // if (!tpConfig) {
+            //     console.log(`Configuration for ${stock} not found`);
+            //     return res.redirect('/');
+            // }
+
+
+            if (atmOption) {
+                const tradingsymbol = atmOption.tradingsymbol;
+                console.log(tradingsymbol)
+                kite.getLTP(`NFO:${tradingsymbol}`).then(ltpResponse => {
+                    console.log(`LTP fetched for ${tradingsymbol}:`, ltpResponse);
+                    const optionLTP = ltpResponse[`NFO:${tradingsymbol}`].last_price;
+                    console.log(`LTP for ${tradingsymbol}: ${optionLTP}`);
+                    const qty = tpConfig.qty * atmOption.lot_size;
+                    logTradeActivity(`placing order for ${tradingsymbol} with qty ${qty} at price ${optionLTP} with TP % ${tpConfig.tp} and SL% ${tpConfig.sl} and lot size ${atmOption.lot_size} and tick size ${atmOption.tick_size} and instrument token ${atmOption.instrument_token}`);
+                    const tickSize = atmOption.tick_size; // Assuming you have this value from your instrument data
+                    placeLimitOrder(tradingsymbol, qty, optionLTP, "BUY", tickSize);
 
 
 
-                console.log(`subscribing ltp for ${[atmOption.instrument_token]}`)
+                    console.log(`subscribing ltp for ${[atmOption.instrument_token]}`)
 
-                startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP, tradingsymbol, atmOption.tick_size, qty);
+                    startKiteTicker(config.api_key, [atmOption.instrument_token], tpConfig, optionLTP, tradingsymbol, atmOption.tick_size, qty);
 
 
-            }).catch(err => logLtpActivity(`Error getting LTP for ${tradingsymbol}: ${err}`));
+                }).catch(err => logLtpActivity(`Error getting LTP for ${tradingsymbol}: ${err}`));
 
-            // Assuming you have a function to place orders and manage TP/SL (you need to implement placeOrderWithTPSL)
-            // placeOrderWithTPSL(tradingsymbol, atmOption, message);
+                // Assuming you have a function to place orders and manage TP/SL (you need to implement placeOrderWithTPSL)
+                // placeOrderWithTPSL(tradingsymbol, atmOption, message);
 
-            logTradeActivity(`Order processed for ${tradingsymbol} based on alert for ${stock}`);
-        } else {
-            console.log(`No suitable option found for ${stock}`);
+                logTradeActivity(`Order processed for ${tradingsymbol} based on alert for ${stock}`);
+            } else {
+                console.log(`No suitable option found for ${stock}`);
+            }
+        }
+        else {
+            console.log(`No TPSL settings found for ${stock}, skipping.`);
+            logTradeActivity(`No TPSL settings found for ${stock}, skipping.`);
         }
     });
 
