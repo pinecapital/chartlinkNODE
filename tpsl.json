@@ -138,5 +138,40 @@
     "qty": 1,
     "tp": 5,
     "sl": 10
+  },
+  "PNB": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "PFC": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "GMRINFRA": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "RECLTD": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "BHEL": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "NATIONALUM": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
+  },
+  "IDEA": {
+    "qty": 1,
+    "tp": 5,
+    "sl": 10
   }
 }
