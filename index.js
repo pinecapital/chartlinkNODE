@@ -422,6 +422,7 @@ app.get('/login/callback', (req, res) => {
 
 app.post('/chartlink', (req, res) => {
     // Assuming the message is sent in the request body
+    logTradeActivity(`Received chartlink message: ${req.body}`);
 
     if (!req.body.stocks || !req.body.trigger_prices) {
         return res.status(400).send('Missing required fields: stocks or trigger_prices');
