@@ -427,7 +427,7 @@ app.post('/chartlink', (req, res) => {
         return res.status(400).send('Missing required fields: stocks or trigger_prices');
     }
     const message = req.body;
-    logTradeActivity(`Received chartlink message: ${message}`);
+    logLtpActivity(`Received message from chartlink: ${JSON.stringify(message)}`);
 
     const stocks = message.stocks.split(',');
     const triggerPrices = message.trigger_prices.split(',').map(price => parseFloat(price));
