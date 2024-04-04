@@ -422,12 +422,12 @@ app.get('/login/callback', (req, res) => {
 
 app.post('/chartlink', (req, res) => {
     // Assuming the message is sent in the request body
+    logTradeActivity(`Received message from chartlink: ${JSON.stringify(req.body)}`);
 
     if (!req.body.stocks || !req.body.trigger_prices) {
         return res.status(400).send('Missing required fields: stocks or trigger_prices');
     }
     const message = req.body;
-    logLtpActivity(`Received message from chartlink: ${JSON.stringify(message)}`);
 
     const stocks = message.stocks.split(',');
     const triggerPrices = message.trigger_prices.split(',').map(price => parseFloat(price));
