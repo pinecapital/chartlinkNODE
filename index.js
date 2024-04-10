@@ -515,7 +515,6 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
     });
 
     let positionExited = false;
-    let reconnectAttempts = 0;
 
 
     kws.connect();
@@ -563,12 +562,13 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
         console.log(`WebSocket error for ${tradingsymbol}: ${error.message}`);
 
         if (error.message.includes('429')) {
-            // Implement a backoff strategy
-            const delay = Math.min(1000 * 2 ** reconnectAttempts, 30000); // Exponential backoff with a cap
-            reconnectAttempts++;
-            setTimeout(() => kws.connect(), delay);
+            kws.unsubscribe(tokens);
+            logTradeActivity(`Unsubscribed token ${tokens} for ${tradingsymbol} due to rate limit (429).`);
 
-            console.log(`Reconnecting ${tradingsymbol} after delay: ${delay}ms due to rate limit.`);
+            
+        } else {
+            // Log other errors without unsubscribing
+            logTradeActivity(`WebSocket error for ${tradingsymbol}: ${error.message}`);
         }
     });
 
