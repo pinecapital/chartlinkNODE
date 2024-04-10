@@ -9,4 +9,7 @@ index.exe
 key/
 tokenDetails.json
 trade_logs.txt
+totp.js
+ltp_logs.txt
+trade_logs.txt
 ```
