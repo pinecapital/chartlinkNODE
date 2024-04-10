@@ -515,6 +515,8 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
     });
 
     let positionExited = false;
+    let reconnectAttempts = 0;
+
 
     kws.connect();
     kws.on('ticks', ticks => {
@@ -544,6 +546,7 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
         });
     });
     kws.on('connect', () => {
+        reconnectAttempts = 0; // Reset reconnect attempts on successful connection
         console.log('WebSocket connected');
         console.log(`Subscribing to tokens: ${tokens}`)
         kws.subscribe([tokens]);
@@ -553,8 +556,20 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
         console.error(`WebSocket disconnected: ${reason}`);
     });
 
-    kws.on('error', (error) => {
+    kws.on('error', error => {
         console.error(`WebSocket error: ${error.message}`);
+
+        // Log the error using logTradeActivity
+        console.log(`WebSocket error for ${tradingsymbol}: ${error.message}`);
+
+        if (error.message.includes('429')) {
+            // Implement a backoff strategy
+            const delay = Math.min(1000 * 2 ** reconnectAttempts, 30000); // Exponential backoff with a cap
+            reconnectAttempts++;
+            setTimeout(() => kws.connect(), delay);
+
+            console.log(`Reconnecting ${tradingsymbol} after delay: ${delay}ms due to rate limit.`);
+        }
     });
 
     kws.on('reconnect', (attempt, delay) => {
