@@ -313,7 +313,7 @@ app.post('/update-tpsl', (req, res) => {
 
     // Extract new stock data from the request body
     const { new_stock } = req.body;
-    
+
     // Remove 'new_stock' from the new settings to avoid conflicts
     const updatedSettings = { ...req.body };
     delete updatedSettings.new_stock;
@@ -487,104 +487,108 @@ app.post('/chartlink', (req, res) => {
 
 
 function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, tick_size, qty) {
-    if (!isTokenValid()) {
-        console.error('Access token is invalid or expired. Please log in again.');
-        // You might want to handle re-login here or notify the user to re-login
-        return;
-    }
-    // If the token is valid, proceed with using it
-    const tokenDetails = getTokenDetails();
-    const accessToken = tokenDetails.accessToken;
-
-    console.log(`current apikey for subscription ${apiKey}`)
-
-    console.log(`current tokens for subscription ${tokens}`)
-    console.log(`current entryPrice for subscription ${entryPrice}`)
-    console.log(`current tradingsymbol for subscription ${tradingsymbol}`)
-    console.log(`current stoploss ${tpConfig.sl}`)
-    console.log(`current takeprofit ${tpConfig.tp}`)
-    console.log(`acccess token for subscription ${currentAccessToken}`)
-    // if (!currentAccessToken) {
-    //     console.error('Access token is not set. Make sure to log in first.');
-    //     return;
-    // }
-
-    const kws = new KiteTicker({
-        api_key: apiKey,
-        access_token: accessToken // Use the in-memory token
-    });
-
-    let positionExited = false;
-
-
-    kws.connect();
-    kws.on('ticks', ticks => {
-        if (positionExited) return;
-
-        ticks.forEach(tick => {
-            const currentPrice = tick.last_price;
-            const tpPrice = entryPrice * (1 + tpConfig.tp / 100);
-            const slPrice = entryPrice * (1 - tpConfig.sl / 100);
-            logLtpActivity(`Tick for token ${tick.instrument_token}: LTP = ${currentPrice} tpPrice = ${tpPrice} slPrice = ${slPrice}`);
-
-
-            if (currentPrice >= tpPrice || currentPrice <= slPrice) {
-
-                // Place a sell order (simplified version)
-
-                logTradeActivity(`Exiting position for tradingsymbol ${tradingsymbol} token number ${tick.instrument_token} at price ${currentPrice}`);
-                placeLimitOrder(tradingsymbol, qty, currentPrice, "SELL", tick_size);
-
-                positionExited = true;
-                kws.unsubscribe(tokens); // Unsubscribe from ticker updates for this token
-                kws.disconnect(); // 
-
-            }
-
-
-        });
-    });
-    kws.on('connect', () => {
-        reconnectAttempts = 0; // Reset reconnect attempts on successful connection
-        console.log('WebSocket connected');
-        console.log(`Subscribing to tokens: ${tokens}`)
-        kws.subscribe([tokens]);
-        kws.setMode(kws.modeLTP, tokens);
-    });
-    kws.on('disconnect', (reason) => {
-        console.error(`WebSocket disconnected: ${reason}`);
-    });
-
-    kws.on('error', error => {
-        console.error(`WebSocket error: ${error.message}`);
-
-        // Log the error using logTradeActivity
-        console.log(`WebSocket error for ${tradingsymbol}: ${error.message}`);
-
-        if (error.message.includes('429')) {
-            kws.unsubscribe(tokens);
-            logTradeActivity(`Unsubscribed token ${tokens} for ${tradingsymbol} due to rate limit (429).`);
-
-            
-        } else {
-            // Log other errors without unsubscribing
-            logTradeActivity(`WebSocket error for ${tradingsymbol}: ${error.message}`);
+    try {
+        if (!isTokenValid()) {
+            console.error('Access token is invalid or expired. Please log in again.');
+            // You might want to handle re-login here or notify the user to re-login
+            return;
         }
-    });
+        // If the token is valid, proceed with using it
+        const tokenDetails = getTokenDetails();
+        const accessToken = tokenDetails.accessToken;
 
-    kws.on('reconnect', (attempt, delay) => {
-        console.log(`Attempting to reconnect (Attempt: ${attempt}) in ${delay}ms`);
-    });
+        console.log(`current apikey for subscription ${apiKey}`)
 
-}
+        console.log(`current tokens for subscription ${tokens}`)
+        console.log(`current entryPrice for subscription ${entryPrice}`)
+        console.log(`current tradingsymbol for subscription ${tradingsymbol}`)
+        console.log(`current stoploss ${tpConfig.sl}`)
+        console.log(`current takeprofit ${tpConfig.tp}`)
+        console.log(`acccess token for subscription ${currentAccessToken}`)
+        // if (!currentAccessToken) {
+        //     console.error('Access token is not set. Make sure to log in first.');
+        //     return;
+        // }
+
+        const kws = new KiteTicker({
+            api_key: apiKey,
+            access_token: accessToken // Use the in-memory token
+        });
+
+        let positionExited = false;
+
+
+        kws.connect();
+        kws.on('ticks', ticks => {
+            if (positionExited) return;
+
+            ticks.forEach(tick => {
+                const currentPrice = tick.last_price;
+                const tpPrice = entryPrice * (1 + tpConfig.tp / 100);
+                const slPrice = entryPrice * (1 - tpConfig.sl / 100);
+                logLtpActivity(`Tick for token ${tick.instrument_token}: LTP = ${currentPrice} tpPrice = ${tpPrice} slPrice = ${slPrice}`);
+
+
+                if (currentPrice >= tpPrice || currentPrice <= slPrice) {
+
+                    // Place a sell order (simplified version)
+
+                    logTradeActivity(`Exiting position for tradingsymbol ${tradingsymbol} token number ${tick.instrument_token} at price ${currentPrice}`);
+                    placeLimitOrder(tradingsymbol, qty, currentPrice, "SELL", tick_size);
+
+                    positionExited = true;
+                    kws.unsubscribe(tokens); // Unsubscribe from ticker updates for this token
+                    kws.disconnect(); // 
+
+                }
+
+
+            });
+        });
+        kws.on('connect', () => {
+            reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+            console.log('WebSocket connected');
+            console.log(`Subscribing to tokens: ${tokens}`)
+            kws.subscribe([tokens]);
+            kws.setMode(kws.modeLTP, tokens);
+        });
+        kws.on('disconnect', (reason) => {
+            console.error(`WebSocket disconnected: ${reason}`);
+        });
+
+        kws.on('error', error => {
+            console.error(`WebSocket error: ${error.message}`);
+
+            // Log the error using logTradeActivity
+            console.log(`WebSocket error for ${tradingsymbol}: ${error.message}`);
+
+            if (error.message.includes('429')) {
+                kws.unsubscribe(tokens);
+                logTradeActivity(`Unsubscribed token ${tokens} for ${tradingsymbol} due to rate limit (429).`);
+
+
+            } else {
+                // Log other errors without unsubscribing
+                logTradeActivity(`WebSocket error for ${tradingsymbol}: ${error.message}`);
+            }
+        });
+
+        kws.on('reconnect', (attempt, delay) => {
+            console.log(`Attempting to reconnect (Attempt: ${attempt}) in ${delay}ms`);
+        });
+
+    } catch (error) { console.error('WebSocket error occurred:', error);
+    // Log the error using logTradeActivity or any logging mechanism you prefer
+    logTradeActivity(`WebSocket error occurred: ${error.message}`);
+}}
 const sslOptions = {
-    key: fs.readFileSync(config.ssl_key_path),
-    cert: fs.readFileSync(config.ssl_cert_path)
-};
+        key: fs.readFileSync(config.ssl_key_path),
+        cert: fs.readFileSync(config.ssl_cert_path)
+    };
 
 
-https.createServer(sslOptions, app).listen(config.port, () => {
-    console.log(`Server running on https://localhost:${config.port}`);
-    console.log(`open this link in browser http://localhost:${config.port}/kite`)
+    https.createServer(sslOptions, app).listen(config.port, () => {
+        console.log(`Server running on https://localhost:${config.port}`);
+        console.log(`open this link in browser http://localhost:${config.port}/kite`)
 
-});
+    });
