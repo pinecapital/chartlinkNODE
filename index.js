@@ -557,19 +557,24 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
         });
 
         kws.on('error', error => {
-            console.error(`WebSocket error: ${error.message}`);
+            try {
+                console.error(`WebSocket error: ${error.message}`);
 
-            // Log the error using logTradeActivity
-            console.log(`WebSocket error for ${tradingsymbol}: ${error.message}`);
+                // Log the error using logTradeActivity
+                console.log(`WebSocket error for ${tradingsymbol}: ${error.message}`);
 
-            if (error.message.includes('429')) {
-                kws.unsubscribe(tokens);
-                logTradeActivity(`Unsubscribed token ${tokens} for ${tradingsymbol} due to rate limit (429).`);
+                if (error.message.includes('429')) {
+                    // kws.unsubscribe(tokens);
+                    logTradeActivity(`token ${tokens} for ${tradingsymbol} due to rate limit (429).`);
+                } else {
+                    // Log other errors without unsubscribing
+                    logTradeActivity(`WebSocket error for ${tradingsymbol}: ${error.message}`);
+                }
+            }
 
-
-            } else {
-                // Log other errors without unsubscribing
-                logTradeActivity(`WebSocket error for ${tradingsymbol}: ${error.message}`);
+            catch (handlingError) {
+                console.error(`Error handling WebSocket error: ${handlingError.message}`);
+                logTradeActivity(`Error handling WebSocket error for ${tradingsymbol}: ${handlingError.message}`);
             }
         });
 
@@ -577,18 +582,20 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
             console.log(`Attempting to reconnect (Attempt: ${attempt}) in ${delay}ms`);
         });
 
-    } catch (error) { console.error('WebSocket error occurred:', error);
-    // Log the error using logTradeActivity or any logging mechanism you prefer
-    logTradeActivity(`WebSocket error occurred: ${error.message}`);
-}}
+    } catch (error) {
+        console.error('WebSocket error occurred:', error);
+        // Log the error using logTradeActivity or any logging mechanism you prefer
+        logTradeActivity(`WebSocket error occurred: ${error.message}`);
+    }
+}
 const sslOptions = {
-        key: fs.readFileSync(config.ssl_key_path),
-        cert: fs.readFileSync(config.ssl_cert_path)
-    };
+    key: fs.readFileSync(config.ssl_key_path),
+    cert: fs.readFileSync(config.ssl_cert_path)
+};
 
 
-    https.createServer(sslOptions, app).listen(config.port, () => {
-        console.log(`Server running on https://localhost:${config.port}`);
-        console.log(`open this link in browser http://localhost:${config.port}/kite`)
+https.createServer(sslOptions, app).listen(config.port, () => {
+    console.log(`Server running on https://localhost:${config.port}`);
+    console.log(`open this link in browser http://localhost:${config.port}/kite`)
 
-    });
+});
