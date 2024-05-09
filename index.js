@@ -578,9 +578,9 @@ function startKiteTicker(apiKey, tokens, tpConfig, entryPrice, tradingsymbol, ti
             }
         });
 
-        kws.on('reconnect', (attempt, delay) => {
-            console.log(`Attempting to reconnect (Attempt: ${attempt}) in ${delay}ms`);
-        });
+        // kws.on('reconnect', (attempt, delay) => {
+        //     console.log(`Attempting to reconnect (Attempt: ${attempt}) in ${delay}ms`);
+        // });
 
     } catch (error) {
         console.error('WebSocket error occurred:', error);
